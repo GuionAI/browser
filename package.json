@@ -1,0 +1,13 @@
+{
+  "name": "@guionai/browser",
+  "version": "1.2.1",
+  "type": "module",
+  "description": "Self-hosted remote Chromium server powered by Rebrowser Playwright, with Xvfb and CJK fonts",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "rebrowser-playwright": "1.52.0"
+  }
+}
