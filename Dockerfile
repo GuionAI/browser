@@ -9,7 +9,7 @@ RUN apt-get update \
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev --no-audit --no-fund \
-    && npx playwright install chromium --with-deps
+    && npx -y playwright@1.52.0 install chromium --with-deps
 
 COPY server.js entrypoint.sh ./
 RUN chmod +x entrypoint.sh
