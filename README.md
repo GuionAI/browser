@@ -2,13 +2,17 @@
 
 **A self-hosted Chromium server for Playwright clients, with Xvfb and CJK fonts.**
 
-Run it on a trusted private network, then connect with a Playwright client:
+Run it on a trusted private network:
 
 ```bash
-docker run --rm -p 127.0.0.1:3000:3000 ghcr.io/guionai/browser:latest
+docker run -d --rm --name guionai-browser -p 127.0.0.1:3000:3000 ghcr.io/guionai/browser:latest
 ```
 
-```js
+In another terminal, install a matching Playwright client and connect:
+
+```bash
+npm install rebrowser-playwright-core@1.52.0
+node --input-type=module <<'JS'
 import { chromium } from 'rebrowser-playwright-core';
 
 const browser = await chromium.connect('ws://127.0.0.1:3000/');
@@ -16,7 +20,10 @@ const page = await browser.newPage();
 await page.goto('https://example.com');
 console.log(await page.title());
 await browser.close();
+JS
 ```
+
+Stop the server with `docker stop guionai-browser`.
 
 The image runs `rebrowser-playwright` 1.52.0 on Node 20. It starts a virtual X display and a Chromium Playwright server. The browser is headed by default; set `HEADLESS=true` to run it headless. `PORT` defaults to `3000`, and `BROWSER_LOCALE` defaults to `zh-CN`. Clients should use a compatible Playwright 1.52.x release.
 

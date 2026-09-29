@@ -11,7 +11,7 @@ COPY package.json package-lock.json ./
 RUN npm ci --omit=dev --no-audit --no-fund \
     && npx -y playwright@1.52.0 install chromium --with-deps
 
-COPY server.js entrypoint.sh ./
+COPY server.js entrypoint.sh LICENSE ./
 RUN chmod +x entrypoint.sh
 
 EXPOSE 3000

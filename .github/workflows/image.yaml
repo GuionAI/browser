@@ -35,6 +35,7 @@ jobs:
         with:
           images: ghcr.io/guionai/browser
           tags: |
+            type=raw,value=pr,enable=${{ github.event_name == 'pull_request' }}
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
             type=sha,format=long,enable=${{ github.ref == 'refs/heads/main' }}
             type=semver,pattern={{version}}
@@ -44,7 +45,27 @@ jobs:
           context: .
           platforms: linux/amd64
           push: ${{ github.event_name != 'pull_request' }}
+          load: ${{ github.event_name == 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+      - name: Smoke test browser connection
+        if: github.event_name == 'pull_request'
+        run: |
+          docker run --rm -d --name browser-smoke ghcr.io/guionai/browser:pr
+          trap 'docker logs browser-smoke; docker stop browser-smoke' EXIT
+          for attempt in $(seq 1 30); do
+            if docker exec browser-smoke node --input-type=module -e "
+              import { chromium } from 'rebrowser-playwright';
+              const browser = await chromium.connect('ws://127.0.0.1:3000/');
+              const page = await browser.newPage();
+              await page.goto('data:text/html,<title>ready</title>');
+              if (await page.title() !== 'ready') process.exit(1);
+              await browser.close();
+            "; then
+              exit 0
+            fi
+            sleep 1
+          done
+          exit 1
